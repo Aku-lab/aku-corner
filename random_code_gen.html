@@ -173,8 +173,27 @@
                 last_ch = ch;
             }
             code_elem.value = code; // Set the final code
+            autoCopyCode(); // Auto-copy the code to the clipboard
             code_elem.focus();
             code_elem.select();
+        }
+
+        // Auto-copy function
+        function autoCopyCode() {
+            navigator.clipboard.writeText(code_elem.value).then(() => {
+                alert("Code auto-copied to clipboard!");
+            }).catch(err => {
+                console.error("Failed to copy: ", err);
+            });
+        }
+
+        // Double-click copy function
+        function copyOnDoubleClick() {
+            navigator.clipboard.writeText(code_elem.value).then(() => {
+                alert("Code copied to clipboard on double-click!");
+            }).catch(err => {
+                console.error("Failed to copy: ", err);
+            });
         }
 
         function generate_code_with_new_alphabet(use_predefined) {
@@ -212,17 +231,15 @@
             codesize_elem = document.getElementById('codesize');
             code_nbits_elem = document.getElementById('code_nbits');
             code_elem = document.getElementById('code');
-            prefix_elem = document.getElementById('prefix'); // Initialize prefix element
+            prefix_elem = document.getElementById('prefix'); // Initialize the prefix element
+            generate_code_with_new_alphabet(true);
 
-            generate_code_with_new_alphabet(true); // Use default alphabet
+            // Attach double-click event for copying code
+            code_elem.addEventListener('dblclick', copyOnDoubleClick);
         }
-
-        window.addEventListener('load', init, false);
     </script>
-
 </head>
-
-<body>
+<body onLoad="init()">
 
      <!-- Navbar -->
     <nav class="navbar navbar-expand-lg navbar-dark">
@@ -254,8 +271,7 @@
     <h1>Code Generator</h1>
 
     <div class="box">
-        <p>
-            <label for="codeformat">Code format:</label>
+        <p><label for="codeformat">Code format:</label>
             <select id="codeformat" onChange="generate_code_with_new_alphabet(true)">
                 <option value="hex">Hex</option>
                 <option value="dec">Decimal</option>
