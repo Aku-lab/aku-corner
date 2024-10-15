@@ -91,6 +91,19 @@
             margin-top: 5px;
         }
 
+        .notification {
+            position: absolute;
+            top: -50px;
+            right: 20px;
+            background-color: #4CAF50;
+            color: white;
+            padding: 15px;
+            border-radius: 5px;
+            font-size: 1rem;
+            display: none;
+            z-index: 1000;
+        }
+
         footer {
             margin-top: auto;
             font-size: 12px;
@@ -109,7 +122,7 @@
         var codesize_elem;
         var code_nbits_elem;
         var code_elem;
-        var prefix_elem; // New variable for prefix input
+        var prefix_elem;
 
         const alphabets = {
             hex: '0123456789ABCDEF',
@@ -152,7 +165,7 @@
 
         function generate_code() {
             const nchars = +codesize_elem.value;
-            const prefix = prefix_elem.value.trim(); // Get the prefix value
+            const prefix = prefix_elem.value.trim();
             if (isNaN(nchars) || (nchars < 1) || (nchars > 1000)) {
                 code_elem.value = 'Invalid code size! Must be 1 - 1000.';
                 return;
@@ -161,7 +174,7 @@
             const is_unambig = format.startsWith('unambig');
             const alphlen = current_alphabet_codepoints.length;
             code_nbits_elem.innerText = (nchars * Math.log2(alphlen)).toFixed(2);
-            let code = prefix; // Start the code with the prefix
+            let code = prefix;
             let last_ch = '';
             for (let i = 0; i < nchars; i++) {
                 let ch;
@@ -169,31 +182,29 @@
                     const codepoint = current_alphabet_codepoints[Math.floor(Math.random() * alphlen)];
                     ch = codepoint_to_utf16_string(codepoint);
                 } while (is_unambig && ['vv', 'VV', 'rn', 'rm'].includes(last_ch + ch));
-                code += ch; // Append to the code
+                code += ch;
                 last_ch = ch;
             }
-            code_elem.value = code; // Set the final code
-            autoCopyCode(); // Auto-copy the code to the clipboard
-            code_elem.focus();
-            code_elem.select();
+            code_elem.value = code;
         }
 
-        // Auto-copy function
-        function autoCopyCode() {
-            navigator.clipboard.writeText(code_elem.value).then(() => {
-                alert("Code auto-copied to clipboard!");
-            }).catch(err => {
-                console.error("Failed to copy: ", err);
-            });
-        }
-
-        // Double-click copy function
         function copyOnDoubleClick() {
             navigator.clipboard.writeText(code_elem.value).then(() => {
-                alert("Code copied to clipboard on double-click!");
+                showNotification("Code copied to clipboard!");
             }).catch(err => {
                 console.error("Failed to copy: ", err);
             });
+        }
+
+        // Show notification without alert
+        function showNotification(message) {
+            const notification = document.getElementById('notification');
+            notification.innerText = message;
+            notification.style.display = 'block';
+
+            setTimeout(() => {
+                notification.style.display = 'none';
+            }, 3000); // Hide after 3 seconds
         }
 
         function generate_code_with_new_alphabet(use_predefined) {
@@ -218,7 +229,7 @@
                     }
                 }
             }
-            alphabet_nchars_elem.innerText = current_alphabet_codepoints.length
+            alphabet_nchars_elem.innerText = current_alphabet_codepoints.length;
             alphabet_nbits_elem.innerText = Math.log2(current_alphabet_codepoints.length).toFixed(2);
             generate_code();
         }
@@ -231,7 +242,7 @@
             codesize_elem = document.getElementById('codesize');
             code_nbits_elem = document.getElementById('code_nbits');
             code_elem = document.getElementById('code');
-            prefix_elem = document.getElementById('prefix'); // Initialize the prefix element
+            prefix_elem = document.getElementById('prefix'); 
             generate_code_with_new_alphabet(true);
 
             // Attach double-click event for copying code
@@ -303,6 +314,9 @@
         <button class="btn" type="button" onClick="generate_code()">Generate new code</button>
         <textarea id="code" readonly onFocus="this.select()"></textarea>
     </div>
+
+    <!-- Notification Box -->
+    <div id="notification" class="notification"></div>
 </div>
 </body>
 
