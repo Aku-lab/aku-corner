@@ -43,10 +43,12 @@
             background-color: rgba(0, 0, 0, 0.9);
             border: 1px solid #ffcc00;
             border-radius: 10px;
+            transition: background-color 0.3s;
         }
 
         .dropdown-item {
             color: #ffcc00;
+            transition: background-color 0.3s, color 0.3s;
         }
 
         .dropdown-item:hover {
@@ -113,6 +115,11 @@
         textarea {
             resize: none;
             height: 150px;
+        }
+
+        .generated-code {
+            width: 70%; /* Change width to make it smaller */
+            margin: 10px auto; /* Center it */
         }
 
         .btn {
@@ -241,12 +248,15 @@
                 if (alphabet) {
                     alphabet_elem.value = alphabet;
                 } else {
-                    codeformat_elem.value = 'user';
+                    codeformat_elem.value = 'unambig_alphanum';
+                    alphabet_elem.value = alphabets.unambig_alphanum;
                 }
                 current_alphabet_codepoints = utf16_string_to_unicode_list(alphabet_elem.value);
             } else {
                 current_alphabet_codepoints = utf16_string_to_unicode_list(alphabet_elem.value);
             }
+            alphabet_nchars_elem.value = current_alphabet_codepoints.length;
+            alphabet_nbits_elem.innerText = (Math.log2(current_alphabet_codepoints.length)).toFixed(2);
             codesize_elem.value = Math.min(Math.max(codesize_elem.value, 1), 1000);
             generate_code();
         }
@@ -276,27 +286,6 @@
     <nav class="navbar navbar-expand-lg navbar-dark">
         <div class="container">
             <a class="navbar-brand" href="#">Task Generator</a>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ml-auto">
-                    <li class="nav-item">
-                        <a class="nav-link active" href="#">Home</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#">About</a>
-                    </li>
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                            Options
-                        </a>
-                        <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-                            <a class="dropdown-item" href="#">Action 1</a>
-                            <a class="dropdown-item" href="#">Action 2</a>
-                            <div class="dropdown-divider"></div>
-                            <a class="dropdown-item disabled" href="#">Something else here</a>
-                        </div>
-                    </li>
-                </ul>
-            </div>
         </div>
     </nav>
 
@@ -304,15 +293,21 @@
         <h1>Generate Task</h1>
         <div class="box">
             <p>Code Format:</p>
-            <select id="codeformat" class="form-control">
-                <option value="hex">Hexadecimal</option>
-                <option value="dec">Decimal</option>
-                <option value="bin">Binary</option>
-                <option value="mime64">Base64</option>
-                <option value="unambig_ascii">Unambiguous ASCII</option>
-                <option value="unambig_alphanum">Unambiguous Alphanumeric</option>
-                <option value="user">User-defined</option>
-            </select>
+            <div class="dropdown">
+                <button class="btn dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    Select Format
+                </button>
+                <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                    <a class="dropdown-item" href="#" data-value="hex">Hexadecimal</a>
+                    <a class="dropdown-item" href="#" data-value="dec">Decimal</a>
+                    <a class="dropdown-item" href="#" data-value="bin">Binary</a>
+                    <a class="dropdown-item" href="#" data-value="mime64">Base64</a>
+                    <a class="dropdown-item" href="#" data-value="unambig_ascii">Unambiguous ASCII</a>
+                    <a class="dropdown-item" href="#" data-value="unambig_alphanum">Unambiguous Alphanumeric</a>
+                    <a class="dropdown-item disabled" href="#">User-defined</a>
+                </div>
+            </div>
+            <input type="hidden" id="codeformat" />
         </div>
         <div class="box">
             <p>Alphabet:</p>
@@ -334,7 +329,7 @@
         </div>
         <div class="box">
             <p>Generated Code:</p>
-            <input type="text" id="code" class="form-control" readonly />
+            <input type="text" id="code" class="form-control generated-code" readonly /> <!-- Adjusted class -->
         </div>
         <button type="button" class="btn" onclick="generate_code()">Generate Code</button>
     </div>
@@ -347,6 +342,19 @@
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.10.2/dist/umd/popper.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+    <script>
+        // Set dropdown functionality
+        document.querySelectorAll('.dropdown-item').forEach(item => {
+            item.addEventListener('click', function (event) {
+                event.preventDefault();
+                const value = this.getAttribute('data-value');
+                document.getElementById('codeformat').value = value; // Set the hidden input value
+                document.querySelector('.btn.dropdown-toggle').textContent = this.textContent; // Update button text
+                generate_code_with_new_alphabet(true); // Call function to update code
+            });
+        });
+    </script>
 </body>
 
 </html>
