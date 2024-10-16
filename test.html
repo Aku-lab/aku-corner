@@ -33,10 +33,10 @@
 <body>
 
     <h1>Find Your Receptionist Link</h1>
-    <p>Enter your name to find the receptionist link associated with you:</p>
+    <p>Enter the receptionist name to find the associated link:</p>
 
     <!-- Input for name -->
-    <input type="text" id="name-input" placeholder="Enter your name" />
+    <input type="text" id="name-input" placeholder="Enter receptionist's name" />
     <button onclick="findReceptionistLink()">Find Link</button>
 
     <!-- Div to display the result -->
@@ -47,7 +47,7 @@
             const inputName = $('#name-input').val().trim().toLowerCase(); // Get user input and convert to lowercase
 
             if (!inputName) {
-                $('#result').html('<p class="not-found">Please enter a name.</p>').show();
+                $('#result').html('<p class="not-found">Please enter a receptionist name.</p>').show();
                 return;
             }
 
@@ -64,12 +64,12 @@
                 var found = false;
                 $(entry).each(function(index) {
                     if (index > 0) { // Skip header
-                        const nameInSheet = this[0].toLowerCase(); // Convert name in sheet to lowercase
-                        const receptionistLink = this[1]; // Assuming receptionist link is in the second column
+                        const receptionistName = this[2]?.toLowerCase(); // Receptionist Name is in the third column
+                        const receptionistLink = this[4]; // Receptionist Link is in the fifth column
 
-                        if (nameInSheet === inputName) {
+                        if (receptionistName && receptionistName.includes(inputName)) {
                             // Display the link if name matches
-                            $('#result').html(`<p>Your receptionist link: <a href="${receptionistLink}" target="_blank">${receptionistLink}</a></p>`).show();
+                            $('#result').html(`<p>Receptionist link for ${this[2]}: <a href="${receptionistLink}" target="_blank">${receptionistLink}</a></p>`).show();
                             found = true;
                             return false; // Exit loop once match is found
                         }
@@ -78,7 +78,7 @@
 
                 if (!found) {
                     // If name not found, show a "not found" message
-                    $('#result').html('<p class="not-found">Name not found. Please try again.</p>').show();
+                    $('#result').html('<p class="not-found">Receptionist name not found. Please try again.</p>').show();
                 }
             })
             .fail(function() {
