@@ -31,12 +31,11 @@
 
         .navbar-nav .nav-link {
             color: #ffcc00 !important;
-            transition: color 0.3s, transform 0.3s;
+            transition: color 0.3s;
         }
 
         .navbar-nav .nav-link:hover {
             color: #fff !important;
-            transform: scale(1.1);
         }
 
         .dropdown-menu {
@@ -55,7 +54,7 @@
         }
 
         .dropdown-item.disabled {
-            color: rgba(255, 204, 0, 0.5);
+            color: rgba(255, 204, 0, 0.5); /* Dimmed color for disabled item */
         }
 
         .container {
@@ -67,11 +66,6 @@
             margin: 50px auto;
             box-shadow: 0 8px 30px rgba(0, 0, 0, 0.7);
             text-align: center;
-            transition: transform 0.3s;
-        }
-
-        .container:hover {
-            transform: scale(1.02);
         }
 
         h1 {
@@ -81,9 +75,7 @@
             text-transform: uppercase;
         }
 
-        select,
-        input,
-        textarea {
+        select, input, textarea {
             width: 100%;
             padding: 12px;
             margin: 10px 0;
@@ -92,22 +84,13 @@
             background-color: rgba(255, 255, 255, 0.1);
             color: #ffcc00;
             font-size: 1rem;
-            transition: background-color 0.3s, transform 0.3s, box-shadow 0.3s;
+            transition: background-color 0.3s, transform 0.3s;
         }
 
-        select:hover,
-        input:hover,
-        textarea:hover {
-            box-shadow: 0 0 10px rgba(255, 204, 0, 0.5);
-        }
-
-        select:focus,
-        input:focus,
-        textarea:focus {
+        select:focus, input:focus, textarea:focus {
             background-color: rgba(255, 255, 255, 0.2);
             outline: none;
             transform: scale(1.02);
-            box-shadow: 0 0 10px rgba(255, 204, 0, 0.7);
         }
 
         textarea {
@@ -123,14 +106,13 @@
             border-radius: 10px;
             font-size: 1.1rem;
             cursor: pointer;
-            transition: background 0.3s, transform 0.3s, box-shadow 0.3s;
+            transition: background 0.3s, transform 0.3s;
             width: 100%;
         }
 
         .btn:hover {
             background: linear-gradient(135deg, #e6005c, #e6b800);
             transform: translateY(-3px);
-            box-shadow: 0 5px 15px rgba(255, 204, 0, 0.5);
         }
 
         .box {
@@ -142,8 +124,7 @@
             margin-bottom: 15px;
         }
 
-        .box select,
-        .box input {
+        .box select, .box input {
             margin-top: 5px;
         }
 
@@ -156,7 +137,7 @@
         }
     </style>
 
-    <script type="text/javascript">
+        <script type="text/javascript">
         "use strict";
 
         var codeformat_elem;
@@ -246,54 +227,67 @@
                 current_alphabet_codepoints = utf16_string_to_unicode_list(alphabet_elem.value);
             } else {
                 current_alphabet_codepoints = utf16_string_to_unicode_list(alphabet_elem.value);
+                current_alphabet_codepoints = Array.from(new Set(current_alphabet_codepoints));
+                alphabet_elem.value = unicode_list_to_utf16_string(current_alphabet_codepoints);
+                codeformat_elem.value = 'user';
+                for (const format in alphabets) {
+                    if (alphabet_elem.value == alphabets[format]) {
+                        codeformat_elem.value = format;
+                        break;
+                    }
+                }
             }
-            codesize_elem.value = Math.min(Math.max(codesize_elem.value, 1), 1000);
+            alphabet_nchars_elem.innerText = current_alphabet_codepoints.length
+            alphabet_nbits_elem.innerText = Math.log2(current_alphabet_codepoints.length).toFixed(2);
             generate_code();
         }
 
         function init() {
             codeformat_elem = document.getElementById('codeformat');
             alphabet_elem = document.getElementById('alphabet');
-            alphabet_nchars_elem = document.getElementById('alphabet_nchars');
-            alphabet_nbits_elem = document.getElementById('alphabet_nbits');
+            alphabet_nchars_elem = document.getElementById('alph_nchars');
+            alphabet_nbits_elem = document.getElementById('alph_nbits');
             codesize_elem = document.getElementById('codesize');
             code_nbits_elem = document.getElementById('code_nbits');
             code_elem = document.getElementById('code');
             prefix_elem = document.getElementById('prefix'); // Initialize prefix element
-            codeformat_elem.addEventListener('change', function () { generate_code_with_new_alphabet(true); });
-            alphabet_elem.addEventListener('input', function () { generate_code_with_new_alphabet(false); });
-            alphabet_nchars_elem.addEventListener('input', function () { alphabet_nbits_elem.innerText = (Math.log2(+alphabet_nchars_elem.value)).toFixed(2); });
-            codesize_elem.addEventListener('input', function () { generate_code(); });
-            prefix_elem.addEventListener('input', function () { generate_code(); }); // Event listener for prefix input
-            generate_code_with_new_alphabet(true);
+
+            generate_code_with_new_alphabet(true); // Use default alphabet
         }
 
-        window.onload = init;
+        window.addEventListener('load', init, false);
     </script>
+
+    
 </head>
 
-<body>
+<body onLoad="init()">
+
+     <!-- Navbar -->
     <nav class="navbar navbar-expand-lg navbar-dark">
-        <div class="container">
-            <a class="navbar-brand" href="#">Task Generator</a>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ml-auto">
-                    <li class="nav-item">
-                        <a class="nav-link active" href="#">Home</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#">About</a>
-                    </li>
+        <div class="container-fluid">
+            <a class="navbar-brand" href="index">Ari D Aku</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse justify-content-end" id="navbarNav"> <!-- Align to the right -->
+                <ul class="navbar-nav ms-md-auto">
                     <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                            Options
+                        <a class="nav-link dropdown-toggle" href="#" id="endpointsDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            Endpoints
                         </a>
-                        <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-                            <a class="dropdown-item" href="#">Action 1</a>
-                            <a class="dropdown-item" href="#">Action 2</a>
-                            <div class="dropdown-divider"></div>
-                            <a class="dropdown-item disabled" href="#">Something else here</a>
+                        <div class="dropdown-menu" aria-labelledby="endpointsDropdown">
+                            <a class="dropdown-item" href="random_task_gen">Task Generator</a>
+                            <a class="dropdown-item" href="random_code_gen">Code Generator</a>
+                            <a class="dropdown-item disabled" href="#">More Coming Soon</a>
                         </div>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="feedback"><i class="me-2"></i>Feedback</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="term"><i class="me-2"></i>Terms</a>
                     </li>
                 </ul>
             </div>
@@ -301,52 +295,49 @@
     </nav>
 
     <div class="container">
-        <h1>Generate Task</h1>
+        <h1>Code Generator</h1>
+
         <div class="box">
-            <p>Code Format:</p>
-            <select id="codeformat" class="form-control">
-                <option value="hex">Hexadecimal</option>
-                <option value="dec">Decimal</option>
-                <option value="bin">Binary</option>
-                <option value="mime64">Base64</option>
-                <option value="unambig_ascii">Unambiguous ASCII</option>
-                <option value="unambig_alphanum">Unambiguous Alphanumeric</option>
-                <option value="user">User-defined</option>
-            </select>
+            <p>
+                <label for="codeformat">Code format:</label>
+                <select id="codeformat" onChange="generate_code_with_new_alphabet(true)">
+                    <option value="hex">Hex</option>
+                    <option value="dec">Decimal</option>
+                    <option value="bin">Binary</option>
+                    <option value="mime64">MIME base64</option>
+                    <option value="unambig_ascii">Unambiguous ASCII</option>
+                    <option value="unambig_alphanum" selected>Unambiguous alphanumeric</option>
+                    <option value="user">User defined</option>
+                </select>
+            </p>
+
+            <p>
+                <label for="alphabet">Alphabet:</label>
+                <input type="text" id="alphabet" onFocus="this.select()" onChange="generate_code_with_new_alphabet(false)">
+                <span>Alphabet size: <span id="alph_nchars">0</span> characters (=<span id="alph_nbits">0</span> bits)</span>
+            </p>
+
+            <p>
+                <label for="codesize">Code size:</label>
+                <input type="text" id="codesize" value="8" size="4" maxlength="4" onFocus="this.select()" onChange="generate_code()"> characters 
+                (= <span id="code_nbits">0</span> bits)
+            </p>
+
+            <p>
+                <label for="prefix">Prefix:</label>
+                <input type="text" id="prefix" onFocus="this.select()" placeholder="Enter prefix (e.g., AKU)">
+            </p>
+
+            <button class="btn" type="button" onClick="generate_code()">Generate new code</button>
+            <textarea id="code" readonly onFocus="this.select()"></textarea>
         </div>
-        <div class="box">
-            <p>Alphabet:</p>
-            <input type="text" id="alphabet" class="form-control" value="ABCDEFGHIJKLMNOPQRSTUVWXYZ" />
-            <p>Character Count:</p>
-            <input type="number" id="alphabet_nchars" class="form-control" value="26" />
-            <p>Alphabet Size (bits):</p>
-            <p id="alphabet_nbits" class="text-warning">4.70</p>
-        </div>
-        <div class="box">
-            <p>Code Size:</p>
-            <input type="number" id="codesize" class="form-control" value="8" />
-            <p>Code Size (bits):</p>
-            <p id="code_nbits" class="text-warning">18.36</p>
-        </div>
-        <div class="box">
-            <p>Code Prefix:</p>
-            <input type="text" id="prefix" class="form-control" placeholder="Enter prefix (optional)" />
-        </div>
-        <div class="box">
-            <p>Generated Code:</p>
-            <input type="text" id="code" class="form-control" readonly />
-        </div>
-        <button type="button" class="btn" onclick="generate_code()">Generate Code</button>
     </div>
 
-    <footer>
-        <p>Made by Your Name</p>
-    </footer>
-
-    <!-- Bootstrap JS and dependencies -->
+    <!-- Bootstrap JS, Popper.js, and jQuery -->
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.10.2/dist/umd/popper.min.js"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
 </body>
 
 </html>
