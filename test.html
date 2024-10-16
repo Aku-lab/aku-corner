@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Find Receptionist Link</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f4f4;
+            text-align: center;
+            padding: 50px;
+        }
+        input, button {
+            padding: 10px;
+            font-size: 16px;
+            margin: 10px;
+        }
+        #result {
+            margin-top: 20px;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            display: none;
+        }
+        .not-found {
+            color: red;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Find Your Receptionist Link</h1>
+    <p>Enter your name to find the receptionist link associated with you:</p>
+
+    <!-- Input for name -->
+    <input type="text" id="name-input" placeholder="Enter your name" />
+    <button onclick="findReceptionistLink()">Find Link</button>
+
+    <!-- Div to display the result -->
+    <div id="result"></div>
+
+    <script>
+        function findReceptionistLink() {
+            const inputName = $('#name-input').val().trim().toLowerCase(); // Get user input and convert to lowercase
+
+            if (!inputName) {
+                $('#result').html('<p class="not-found">Please enter a name.</p>').show();
+                return;
+            }
+
+            // Fetch data from the Google Sheet
+            var sheetID = "1pXAHiUFopvNRcVTE923woFqFClY_PlvGL9ZTk8RkUKc";
+            var tab_name = 'Ali';
+            var apiKey = 'AIzaSyCUFA5s4WsRJFXlYDtznyoHvZXqvQu210A';
+            var sheetUrl = 'https://sheets.googleapis.com/v4/spreadsheets/' + sheetID + '/values/' + tab_name + '?alt=json&key=' + apiKey;
+
+            $.getJSON(sheetUrl, function(data) {
+                var entry = data.values;
+
+                // Loop through the spreadsheet data and search for the name
+                var found = false;
+                $(entry).each(function(index) {
+                    if (index > 0) { // Skip header
+                        const nameInSheet = this[0].toLowerCase(); // Convert name in sheet to lowercase
+                        const receptionistLink = this[1]; // Assuming receptionist link is in the second column
+
+                        if (nameInSheet === inputName) {
+                            // Display the link if name matches
+                            $('#result').html(`<p>Your receptionist link: <a href="${receptionistLink}" target="_blank">${receptionistLink}</a></p>`).show();
+                            found = true;
+                            return false; // Exit loop once match is found
+                        }
+                    }
+                });
+
+                if (!found) {
+                    // If name not found, show a "not found" message
+                    $('#result').html('<p class="not-found">Name not found. Please try again.</p>').show();
+                }
+            })
+            .fail(function() {
+                // Show an error message if the Google Sheets API call fails
+                $('#result').html('<p class="not-found">Failed to load data. Please try again later.</p>').show();
+            });
+        }
+    </script>
+
+</body>
+</html>
