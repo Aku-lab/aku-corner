@@ -3,91 +3,102 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Find Receptionist Link</title>
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <title>Receptionist Lookup</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <style>
         body {
+            background-color: #f8f9fa;
             font-family: Arial, sans-serif;
-            background: #f4f4f4;
-            text-align: center;
-            padding: 50px;
-        }
-        input, button {
-            padding: 10px;
-            font-size: 16px;
-            margin: 10px;
-        }
-        #result {
-            margin-top: 20px;
             padding: 20px;
+        }
+        .container {
             background-color: #fff;
-            border-radius: 5px;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        .result {
+            margin-top: 20px;
             display: none;
         }
-        .not-found {
+        .error {
             color: red;
         }
     </style>
 </head>
 <body>
 
-    <h1>Find Your Receptionist Link</h1>
-    <p>Enter the receptionist name to find the associated link:</p>
+<div class="container">
+    <h2>Receptionist Lookup</h2>
+    <p>Enter your name to find the corresponding receptionist link:</p>
+    <div class="form-group">
+        <input type="text" id="nameInput" class="form-control" placeholder="Enter your name...">
+    </div>
+    <button id="fetchDataBtn" class="btn btn-primary">Find Receptionist</button>
 
-    <!-- Input for name -->
-    <input type="text" id="name-input" placeholder="Enter receptionist's name" />
-    <button onclick="findReceptionistLink()">Find Link</button>
+    <div id="result" class="result">
+        <h3>Receptionist Information</h3>
+        <p><strong>Receptionist:</strong> <span id="receptionistName"></span></p>
+        <p><strong>Target Score:</strong> <span id="targetScore"></span></p>
+        <p><strong>Link:</strong> <a href="#" target="_blank" id="receptionistLink">Click Here</a></p>
+    </div>
 
-    <!-- Div to display the result -->
-    <div id="result"></div>
+    <div id="error" class="error"></div>
+</div>
 
-    <script>
-        function findReceptionistLink() {
-            const inputName = $('#name-input').val().trim().toLowerCase(); // Get user input and convert to lowercase
-
-            if (!inputName) {
-                $('#result').html('<p class="not-found">Please enter a receptionist name.</p>').show();
-                return;
-            }
-
-            // Fetch data from the Google Sheet
-            var sheetID = "1pXAHiUFopvNRcVTE923woFqFClY_PlvGL9ZTk8RkUKc";
-            var tab_name = 'Ali';
-            var apiKey = 'AIzaSyCUFA5s4WsRJFXlYDtznyoHvZXqvQu210A';
-            var sheetUrl = 'https://sheets.googleapis.com/v4/spreadsheets/' + sheetID + '/values/' + tab_name + '?alt=json&key=' + apiKey;
-
-            $.getJSON(sheetUrl, function(data) {
-                var entry = data.values;
-
-                // Loop through the spreadsheet data and search for the name
-                var found = false;
-                $(entry).each(function(index) {
-                    if (index > 0) { // Skip header
-                        const receptionistName = this[2]?.toLowerCase(); // Receptionist Name is in the third column
-                        const receptionistLink = this[4]; // Receptionist Link is in the fifth column
-
-                        if (receptionistName && receptionistName.includes(inputName)) {
-                            // Display the link if name matches
-                            $('#result').html(`<p>Receptionist link for ${this[2]}: <a href="${receptionistLink}" target="_blank">${receptionistLink}</a></p>`).show();
-                            found = true;
-                            return false; // Exit loop once match is found
-                        }
-                    }
-                });
-
-                if (!found) {
-                    // If name not found, show a "not found" message
-                    $('#result').html('<p class="not-found">Receptionist name not found. Please try again.</p>').show();
-                }
-            })
-            .fail(function() {
-                // Show an error message if the Google Sheets API call fails
-                $('#result').html('<p class="not-found">Failed to load data. Please try again later.</p>').show();
-            });
+<script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+<script>
+$(document).ready(function() {
+    $('#fetchDataBtn').click(function() {
+        var inputName = $('#nameInput').val().trim();
+        if(inputName === '') {
+            $('#error').text('Please enter a name.');
+            $('#result').hide();
+            return;
         }
-    </script>
+        $('#error').text(''); // Clear any previous error messages
+        fetchReceptionistData(inputName);
+    });
+});
+
+function fetchReceptionistData(inputName) {
+    var sheetID = "1pXAHiUFopvNRcVTE923woFqFClY_PlvGL9ZTk8RkUKc";
+    var tab_name = 'Ali';
+    var apiKey = 'AIzaSyCUFA5s4WsRJFXlYDtznyoHvZXqvQu210A';
+    var sheetUrl = 'https://sheets.googleapis.com/v4/spreadsheets/' + sheetID + '/values/' + tab_name + '?alt=json&key=' + apiKey;
+
+    $.getJSON(sheetUrl, function(data) {
+        var entry = data.values;
+        var found = false;
+
+        $(entry).each(function(index) {
+            if (index > 0) { // Skip the header row
+                var receptionistName = this[2]; // Column "RECEPTIONIST"
+                if (receptionistName.toLowerCase().includes(inputName.toLowerCase())) {
+                    $('#receptionistName').text(this[2]); // Show receptionist name
+                    $('#targetScore').text(this[3]); // Show target score
+                    $('#receptionistLink').attr('href', this[4]).text(this[4]); // Set receptionist link
+                    $('#result').show(); // Show the result section
+                    found = true;
+                    return false; // Break out of the loop once a match is found
+                }
+            }
+        });
+
+        if (!found) {
+            $('#error').text('No receptionist found for the given name.');
+            $('#result').hide();
+        }
+    })
+    .fail(function(jqXHR, textStatus, errorThrown) { 
+        console.error('Google spreadsheet load failed: ', textStatus, errorThrown);
+        $('#error').text('Failed to load data from Google Sheets.');
+        $('#result').hide();
+    });
+}
+</script>
 
 </body>
 </html>
-
